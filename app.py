@@ -5,11 +5,14 @@ from time import gmtime, strftime
 from functools import wraps
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
+import jwt
+import json
 
 app=Flask(__name__)
 app.secret_key = 'flasktodotask'  
+secret_key='flasktodotask'  
 
-
+global tokenid
 
 def create_table():
     conn = sqlite3.connect('database.db')
@@ -70,13 +73,39 @@ def get_user_by_email(email):
     conn.close()
     return user
 
+f = open('token.json','r')
+
+data = json.load(f)
+token=data['token']
+
+f.close()
+
+print(token)
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+
+
+        
+
+
+        try:
+            decoded_token = jwt.decode(token, secret_key, algorithms=['HS256'])
+                
+            expiration_time = datetime.datetime.fromtimestamp(decoded_token['exp'])
+            current_time = datetime.datetime.utcnow()
+            if current_time > expiration_time:
+                return redirect(url_for('login', expired=True))
+            else:
+                print("Token is valid")
+        except jwt.ExpiredSignatureError:
+            return redirect(url_for('login', expired=True))
+        except jwt.InvalidTokenError:
+            print("Invalid token")
+            
         if 'email' not in session or 'last_activity' not in session:
             return redirect(url_for('login'))
         
-        # Check if session is expired (4 hours)
         last_activity = session['last_activity']
         now = datetime.datetime.utcnow().replace(tzinfo=utc)  # Make current time timezone-aware
         if now > last_activity + datetime.timedelta(hours=4):
@@ -84,7 +113,7 @@ def login_required(f):
             session.pop('last_activity', None)
             return redirect(url_for('login', expired=True))
 
-        session['last_activity'] = now  # Update last activity time
+        session['last_activity'] = now  
         return f(*args, **kwargs)
     return decorated_function
 
@@ -117,6 +146,27 @@ def login():
         password = request.form['password']
         user = get_user_by_email(email)
         if user and check_password_hash(user[3], password):
+            payload = {
+                'user_id': user,
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=4)  # Token expiry time (1 hour in this example)
+            }
+            token = jwt.encode(payload, secret_key, algorithm='HS256')
+            tokenid=token
+            print("Generated JWT token:", token)
+            
+            import json 
+            
+            dict1= { 
+                  "token": tokenid
+                }
+
+            # the json file where the output must be stored 
+            out_file = open("token.json", "w") 
+
+            json.dump(dict1, out_file, indent = 6) 
+
+            out_file.close() 
+
             session['email'] = email
             session['last_activity'] = datetime.datetime.utcnow().replace(tzinfo=utc)
             return redirect(url_for('index'))
@@ -209,34 +259,6 @@ def modify_task(todo_id):
     conn.close()
 
     return redirect(url_for("index"))
-
-# <tr>
-#             <td>
-#               <div class="d-flex align-items-center">
-#                 <img
-#                     src="https://mdbootstrap.com/img/new/avatars/6.jpg"
-#                     class="rounded-circle"
-#                     alt=""
-#                     style="width: 45px; height: 45px"
-#                     />
-#                 <div class="ms-3">
-#                   <p class="fw-bold mb-1">Alex Ray</p>
-#                   <p class="text-muted mb-0">alex.ray@gmail.com</p>
-#                 </div>
-#               </div>
-#             </td>
-#             <td>
-#               <p class="fw-normal mb-1">Consultant</p>
-#               <p class="text-muted mb-0">Finance</p>
-#             </td>
-#             <td>
-#               <span class="badge badge-primary rounded-pill d-inline"
-#                     >Onboarding</span
-#                 >
-#             </td>
-#             <td>Junior</td>
-            
-#           </tr>
    
 create_table()
 app.run(debug=True,host='0.0.0.0',port='8058')

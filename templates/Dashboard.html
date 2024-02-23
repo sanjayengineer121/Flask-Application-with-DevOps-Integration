@@ -1,0 +1,259 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- Font Awesome -->
+<link
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+rel="stylesheet"
+/>
+<!-- Google Fonts -->
+<link
+href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+rel="stylesheet"
+/>
+<!-- Font Awesome -->
+<link
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+  rel="stylesheet"
+/>
+<!-- Google Fonts -->
+<link
+  href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+  rel="stylesheet"
+/>
+<!-- MDB -->
+<link
+  href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.min.css"
+  rel="stylesheet"
+/>
+  </head>
+<body>
+    <!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-body-tertiary">
+    <!-- Container wrapper -->
+    <div class="container-fluid">
+      <!-- Toggle button -->
+      <button
+        data-mdb-collapse-init
+        class="navbar-toggler"
+        type="button"
+        data-mdb-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <i class="fas fa-bars"></i>
+      </button>
+  
+      <!-- Collapsible wrapper -->
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <!-- Navbar brand -->
+        <a class="navbar-brand mt-2 mt-lg-0" href="#">
+          <img
+            src="https://mdbcdn.b-cdn.net/img/logo/mdb-transaprent-noshadows.webp"
+            height="15"
+            alt="MDB Logo"
+            loading="lazy"
+          />
+        </a>
+        <!-- Left links -->
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/teammember">Team Member</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/tasks">Tasks</a>
+          </li>
+        </ul>
+        <!-- Left links -->
+      </div>
+      <!-- Collapsible wrapper -->
+  
+      <!-- Right elements -->
+      <div class="d-flex align-items-center">
+        <!-- Icon -->
+        <a class="text-reset me-3" href="/logout">
+            <i class="fa fa-sign-out" aria-hidden="true"></i>
+            <span>
+                {{username}}
+            </span>
+        </a>
+        <!-- Avatar -->
+        <div class="dropdown">
+          <a
+            data-mdb-dropdown-init
+            class="dropdown-toggle d-flex align-items-center hidden-arrow"
+            href="#"
+            id="navbarDropdownMenuAvatar"
+            role="button"
+            aria-expanded="false"
+          >
+            <img
+              src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp"
+              class="rounded-circle"
+              height="25"
+              alt="Black and White Portrait of a Man"
+              loading="lazy"
+            />
+          </a>
+          <ul
+            class="dropdown-menu dropdown-menu-end"
+            aria-labelledby="navbarDropdownMenuAvatar"
+          >
+            
+            
+          </ul>
+        </div>
+      </div>
+      <!-- Right elements -->
+    </div>
+    <!-- Container wrapper -->
+  </nav>
+  <!-- Navbar -->
+  
+    <section class="vh-100" style="background-color: #eee;">
+        <div class="container py-5 h-100">
+          <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col col-lg-9 col-xl-7">
+              <div class="card rounded-3">
+                <div class="card-body p-4">
+      
+                  <h4 class="text-center my-3 pb-3">To Do App</h4>
+      
+                  <form class="row row-cols-lg-auto g-3 justify-content-center align-items-center mb-4 pb-2" action="/add_task" method="post">
+                    <div class="col-12">
+                      <div class="form-outline">
+                        <input type="text" id="form3Example1c" name='task' class="form-control" />
+                        <label class="form-label" for='form3Example1c' >Enter a task here</label>
+                      </div>
+                    </div>
+      
+                    <div class="col-12">
+                      <button type="Submit" class="btn btn-primary" onclick="javascript:alert('Task added');">Save</button>
+                    </div>
+
+                  </form>
+      
+                  <table class="table mb-4">
+                    <thead>
+                      <tr>
+                        <th scope="col">No.</th>
+                        <th scope="col">Todo item</th>
+                        <th scope="col">Status</th>
+                        <th scope='col'>Member </th>
+                        <th scope="col">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% for data in tasks %}
+                      <tr>
+                        <th scope="row">{{data[0]}}</th>
+                        <td>{{data[1]}}</td>
+                        <td>
+                            {% if data[2] == 'completed' %}
+
+                            <span class="badge badge-success rounded-pill d-inline">{{data[2]}}</span>
+
+                            {% else %}
+                             <span class="badge badge-warning rounded-pill d-inline">{{data[2]}}</span>
+                                {% endif %}
+
+
+                            </td>
+                        <td> {{data[3]}}</td>
+                        <td>
+                            <!-- Modify Button -->
+                            <button type="button" class="btn btn-warning ms-1" onclick="toggleModifyForm('{{ data[0] }}')">Modify</button>
+                            
+                            <form id="modifyForm{{ data[0] }}" action="/modify_task/{{ data[0] }}" method="post" style="display: none;">
+                                <div class="form-outline">
+                                        <div class="col-12">
+                                          <div class="form-outline">
+                                            <input type="text" id="form3Example1c" name='newtask' class="form-control" />
+                                            <label class="form-label" for='form3Example1c' >Enter a task here</label>
+                                          </div>
+                                        </div>
+                        
+                    
+                                </div>
+                                
+                                <!-- Submit Button -->
+                                <button type="submit" class="btn btn-primary ms-1" onclick="javascript:alert('Task UPDATED');">Update</button>
+                            </form>
+                            
+                            <!-- Delete Button -->
+                            <a href='/delete/{{ data[0] }}'><button type="button" class="btn btn-danger ms-1">Delete</button></a>
+                            
+                            <!-- Finished Button -->
+                            <a href='/update/{{ data[0] }}'><button type="button" class="btn btn-success ms-1">Finished</button></a>
+                        </td>
+                        
+                        <script>
+                            function toggleModifyForm(taskId) {
+                                // Hide all modify forms
+                                document.querySelectorAll('[id^="modifyForm"]').forEach(form => {
+                                    form.style.display = 'none';
+                                });
+                        
+                                // Show the modify form corresponding to the clicked task
+                                document.getElementById('modifyForm' + taskId).style.display = 'block';
+                            }
+                        </script>
+                        
+                        
+                      </tr>
+                      {% endfor %}
+                      
+                    </tbody>
+                  </table>
+      
+                </div>
+                <div class="divider d-flex align-items-center my-4">
+                  <p class="text-center mx-3 mb-0" style="color: #a2aab7;">Shared with</p>
+                </div>
+    
+                <ul class="list-group rounded-0 list-group-horizontal justify-content-center pb-2">
+                  <li class="list-group-item border-0 d-flex align-items-center p-0">
+                    <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-8.webp" alt="avatar"
+                      class="rounded-circle me-n2" width="45">
+                  </li>
+                  <li class="list-group-item border-0 d-flex align-items-center p-0">
+                    <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-3.webp" alt="avatar"
+                      class="rounded-circle me-n2" width="45">
+                  </li>
+                  <li class="list-group-item border-0 d-flex align-items-center p-0">
+                    <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-5.webp" alt="avatar"
+                      class="rounded-circle me-n2" width="45">
+                  </li>
+                  <li class="list-group-item border-0 d-flex align-items-center p-0">
+                    <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-6.webp" alt="avatar"
+                      class="rounded-circle me-n2" width="45">
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <script>
+      fetch('/protected-route', {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + token // Replace 'token' with the actual JWT token
+        }
+      })
+      .then(response => {
+        // Handle response
+      });
+    </script>
+
+</body>
+</html>
